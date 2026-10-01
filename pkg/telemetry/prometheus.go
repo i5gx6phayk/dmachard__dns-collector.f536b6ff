@@ -173,7 +173,7 @@ func InitTelemetryServer(cfg *config.Config, logger *logger.Logger) (*http.Serve
 	// HTTP server
 	promServer := &http.Server{
 		Addr:              cfg.Global.Telemetry.WebListen,
-		ReadHeaderTimeout: 30 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 
 	if cfg.Global.Telemetry.Enabled {
@@ -223,7 +223,7 @@ func InitTelemetryServer(cfg *config.Config, logger *logger.Logger) (*http.Serve
 				tlsConfig := &tls.Config{
 					Certificates: []tls.Certificate{cert},
 					ClientCAs:    clientCAs,
-					ClientAuth:   tls.VerifyClientCertIfGiven,
+					ClientAuth:   tls.RequireAndVerifyClientCert,
 				}
 
 				// Update the promServer with TLS configuration and handler
@@ -231,7 +231,7 @@ func InitTelemetryServer(cfg *config.Config, logger *logger.Logger) (*http.Serve
 			}
 
 			if cfg.Global.Telemetry.BasicAuthEnable {
-				promServer.Handler = basicAuthMiddleware(http.DefaultServeMux, cfg.Global.Telemetry.BasicAuthPwd, cfg.Global.Telemetry.BasicAuthLogin)
+				promServer.Handler = basicAuthMiddleware(http.DefaultServeMux, cfg.Global.Telemetry.BasicAuthLogin, cfg.Global.Telemetry.BasicAuthPwd)
 			} else {
 				promServer.Handler = http.DefaultServeMux
 			}
@@ -249,7 +249,7 @@ func InitTelemetryServer(cfg *config.Config, logger *logger.Logger) (*http.Serve
 					errChan <- err
 					return
 				}
-				if err := promServer.Serve(listener); err != nil {
+				if err := promServer.Serve(listener); err != nil && err != http.ErrServerClosed {
 					errChan <- err
 				}
 			case cfg.Global.Telemetry.TLSSupport:
