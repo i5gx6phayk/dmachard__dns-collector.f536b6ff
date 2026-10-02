@@ -10,7 +10,7 @@ import (
 
 func (dm *DNSMessage) Matching(matching map[string]interface{}) (error, bool) {
 	if len(matching) == 0 {
-		return nil, true
+		return nil, false
 	}
 
 	dmValue := reflect.ValueOf(dm)
@@ -24,7 +24,7 @@ func (dm *DNSMessage) Matching(matching map[string]interface{}) (error, bool) {
 	for nestedKeys, value := range matching {
 		realValue, found := GetFieldByJSONTag(dmValue, nestedKeys)
 		if !found {
-			continue
+			return nil, false
 		}
 
 		expectedValue := reflect.ValueOf(value)
@@ -35,7 +35,7 @@ func (dm *DNSMessage) Matching(matching map[string]interface{}) (error, bool) {
 			if err != nil {
 				return err, false
 			}
-			if match {
+			if !match {
 				return nil, false
 			}
 
@@ -53,7 +53,7 @@ func (dm *DNSMessage) Matching(matching map[string]interface{}) (error, bool) {
 		case reflect.Bool:
 			match, err := matchUserBoolean(realValue, expectedValue)
 			if err != nil {
-				return nil, false
+				return err, false
 			}
 			if !match {
 				return nil, false
