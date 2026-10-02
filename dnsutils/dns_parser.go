@@ -335,9 +335,9 @@ func DecodePayload(dm *DNSMessage, header *DNSHeader, cfg *config.Config) error 
 	dm.DNS.Flags.TC = header.Tc == 1
 	dm.DNS.Flags.AA = header.Aa == 1
 	dm.DNS.Flags.RA = header.Ra == 1
-	dm.DNS.Flags.AD = header.Cd == 1
+	dm.DNS.Flags.AD = header.Ad == 1
 	dm.DNS.Flags.RD = header.Rd == 1
-	dm.DNS.Flags.CD = header.Ad == 1
+	dm.DNS.Flags.CD = header.Cd == 1
 
 	var payloadOffset int
 	// decode DNS question
@@ -361,6 +361,7 @@ func DecodePayload(dm *DNSMessage, header *DNSHeader, cfg *config.Config) error 
 		answers, offset, err := DecodeAnswerInto(dm.DNS.DNSRRs.Answers, header.Ancount, payloadOffset, dm.DNS.Payload)
 		if err == nil { // nolint
 			dm.DNS.DNSRRs.Answers = answers
+			payloadOffset = offset
 		} else if dm.DNS.Flags.TC && (errors.Is(err, ErrDecodeDNSAnswerTooShort) || errors.Is(err, ErrDecodeDNSAnswerRdataTooShort) || errors.Is(err, ErrDecodeDNSLabelTooShort)) {
 			dm.DNS.MalformedPacket = true
 			dm.DNS.DNSRRs.Answers = answers
@@ -406,7 +407,7 @@ func DecodePayload(dm *DNSMessage, header *DNSHeader, cfg *config.Config) error 
 			dm.EDNS = edns
 			// Update the RCode to the "real" rcode
 			if header.Qr == 1 {
-				dm.DNS.Rcode = RcodeToString(header.Rcode)
+				dm.DNS.Rcode = RcodeToString(edns.ExtendedRcode + header.Rcode)
 			}
 		} else if dm.DNS.Flags.TC && (errors.Is(err, ErrDecodeDNSAnswerTooShort) ||
 			errors.Is(err, ErrDecodeDNSAnswerRdataTooShort) ||
