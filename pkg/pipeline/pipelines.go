@@ -249,7 +249,7 @@ func InitPipelines(mapLoggers map[string]workers.Worker, mapCollectors map[strin
 	// 1. Check duplicate stanzas and route definitions
 	for _, stanza := range cfg.Pipelines {
 		if seenStanzas[stanza.Name] {
-			if duplicateReported[stanza.Name] {
+			if !duplicateReported[stanza.Name] {
 				errs = append(errs, &DuplicateStanzaError{Name: stanza.Name})
 				duplicateReported[stanza.Name] = true
 			}
@@ -268,7 +268,7 @@ func InitPipelines(mapLoggers map[string]workers.Worker, mapCollectors map[strin
 				errs = append(errs, &RouteNotFoundError{Name: route, From: stanza.Name})
 			}
 		}
-		for _, route := range stanza.RoutingPolicy.Forward {
+		for _, route := range stanza.RoutingPolicy.Dropped {
 			if err := IsRouteExist(route, cfg); err != nil {
 				errs = append(errs, &RouteNotFoundError{Name: route, From: stanza.Name})
 			}
@@ -288,7 +288,7 @@ func InitPipelines(mapLoggers map[string]workers.Worker, mapCollectors map[strin
 	for _, stanza := range cfg.Pipelines {
 		stanzaConfig, err := GetStanzaConfig(cfg, stanza)
 		if err != nil {
-			errs = append(errs, err)
+			stanzaErrs = append(stanzaErrs, err)
 			continue
 		}
 		CreateStanza(stanza.Name, stanzaConfig, mapCollectors, mapLoggers, logger, telemetry)
@@ -302,7 +302,7 @@ func InitPipelines(mapLoggers map[string]workers.Worker, mapCollectors map[strin
 	var routingErrs []error
 	for _, stanza := range cfg.Pipelines {
 		if mapCollectors[stanza.Name] != nil || mapLoggers[stanza.Name] != nil {
-			if err := CreateRouting(stanza, mapLoggers, mapCollectors, logger); err != nil {
+			if err := CreateRouting(stanza, mapCollectors, mapLoggers, logger); err != nil {
 				routingErrs = append(routingErrs, err)
 			}
 		} else {
