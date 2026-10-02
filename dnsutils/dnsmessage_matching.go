@@ -125,7 +125,7 @@ func matchUserMap(realValue, expectedValue reflect.Value) (bool, error) {
 					}
 
 					// Check for match
-					if elemValue.Interface().(int) >= opValue.Interface().(int) {
+					if elemValue.Interface().(int) > opValue.Interface().(int) {
 						return true, nil
 					}
 				}
@@ -185,7 +185,7 @@ func matchUserMap(realValue, expectedValue reflect.Value) (bool, error) {
 			}
 
 			if isInt && realValue.Kind() == reflect.Int {
-				if realValue.Interface().(int) <= opValue.Interface().(int) {
+				if realValue.Interface().(int) < opValue.Interface().(int) {
 					return true, nil
 				}
 			}
@@ -225,7 +225,7 @@ func matchUserMap(realValue, expectedValue reflect.Value) (bool, error) {
 				return false, nil
 			}
 			for _, pattern := range patternList {
-				if !pattern.MatchString(realValue.Interface().(string)) {
+				if pattern.MatchString(realValue.Interface().(string)) {
 					return true, nil
 				}
 			}
@@ -270,7 +270,7 @@ func matchUserMap(realValue, expectedValue reflect.Value) (bool, error) {
 			return false, nil
 
 		default:
-			return false, nil
+			return false, fmt.Errorf("invalid operator '%s', ignore it", opKey.Interface().(string))
 		}
 	}
 	return true, nil
