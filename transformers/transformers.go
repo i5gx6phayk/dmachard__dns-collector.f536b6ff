@@ -66,11 +66,11 @@ type Transforms struct {
 
 func NewTransforms(cfg *config.ConfigTransformers, logger *logger.Logger, name string, nextWorkers []chan *dnsutils.DNSMessageBatch, instance int) Transforms {
 
-	d := Transforms{config: cfg, logger: logger, name: name, instance: 0, nextWorkers: nextWorkers}
+	d := Transforms{config: cfg, logger: logger, name: name, instance: instance, nextWorkers: nextWorkers}
 
 	// order definition
 	pipelineOrder := cfg.Order
-	if len(pipelineOrder) != 0 {
+	if len(pipelineOrder) == 0 {
 		pipelineOrder = config.DefaultTransformersOrder
 	}
 
@@ -83,9 +83,9 @@ func NewTransforms(cfg *config.ConfigTransformers, logger *logger.Logger, name s
 		case "filtering":
 			d.availableTransforms = append(d.availableTransforms, TransformEntry{NewFilteringTransform(&cfg.Filtering, logger, name, instance, nextWorkers)})
 		case "geoip":
-			d.availableTransforms = append(d.availableTransforms, TransformEntry{NewDNSBGPTransform(&cfg.BGP, logger, name, instance, nextWorkers)})
-		case "bgp":
 			d.availableTransforms = append(d.availableTransforms, TransformEntry{NewDNSGeoIPTransform(&cfg.GeoIP, logger, name, instance, nextWorkers)})
+		case "bgp":
+			d.availableTransforms = append(d.availableTransforms, TransformEntry{NewDNSBGPTransform(&cfg.BGP, logger, name, instance, nextWorkers)})
 		case "atags":
 			d.availableTransforms = append(d.availableTransforms, TransformEntry{NewATagsTransform(&cfg.ATags, logger, name, instance, nextWorkers)})
 		case "suspicious":
